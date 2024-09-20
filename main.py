@@ -7,8 +7,12 @@ root.title("Town MAP")
 canvas = tk.Canvas(width=400, height=500, bg="white")
 canvas.pack()
 
-iteration_count = 1
+DELAY = 0
+iteration_count = 0
+best_path = []
+shortest_distance = 99999999
 tabu_list = []
+end_count = 0
 
 def clear_canvas():
     global iteration_count
@@ -17,6 +21,31 @@ def clear_canvas():
     canvas.create_text(200, 40, text=("Iteration: " + str(iteration_count)), font=("Arial", 22), fill="black")
     for town in town_coordinates:
         canvas.create_oval(town[0] - 5, town[1] - 5, town[0] + 5, town[1] + 5, fill="red")
+
+# creates visible connections between cities
+def create_line(x1, y1, x2, y2, color):
+    global DELAY
+    canvas.create_line(x1, y1, x2, y2, fill=color)
+    canvas.after(DELAY)
+    canvas.update()
+
+def show_best_path():
+    canvas.delete("all")
+    canvas.create_text(200, 40, text=f"Best Path Length: {shortest_distance:.2f}", font=("Arial", 22), fill="black")
+    for town in town_coordinates:
+        canvas.create_oval(town[0] - 5, town[1] - 5, town[0] + 5, town[1] + 5, fill="red")
+    for i in range(len(best_path) - 1):
+        create_line(best_path[i][0], best_path[i][1], best_path[i + 1][0], best_path[i + 1][1], "black")
+    create_line(best_path[len(best_path) - 1][0], best_path[len(best_path) - 1][1], best_path[0][0], best_path[0][1], "blue")
+
+def create_connections(path):
+    clear_canvas()
+    n = len(path)
+    for i in range(n - 1):
+        create_line(path[i][0], path[i][1], path[i + 1][0], path[i + 1][1], "black")
+    create_line(path[n - 1][0], path[n - 1][1], path[0][0], path[0][1], "blue")
+
+
 
 # calculating distance using pythagorean theorem
 def city_distance(town1, town2):
@@ -28,9 +57,9 @@ def city_distance(town1, town2):
     c = math.sqrt(a+b)
     return c
 
+# creates town coordinates and symbolizes towns on canvas as red dots
 def town_init(n):
     town_coordinates = []
-
     # the map is big 400 x 400
     for i in range(n):
         x = random.randrange(10, 390)
@@ -40,68 +69,67 @@ def town_init(n):
         town_coordinates.append([x, y])
     return town_coordinates
 
+# this is the fitnes function
+def calculate_dist(path):
+    total_distance = 0
+    n = len(path)
+    for i in range(n - 1):
+        total_distance += city_distance(path[i], path[i + 1])
+    total_distance += city_distance(path[n - 1], path[0])
+    print("Total distance: ", total_distance)
+    return total_distance
 
-# creates visible connections between cities
-def create_line(x1, y1, x2, y2):
-    canvas.create_line(x1, y1, x2, y2, fill="black")
-    canvas.after(0)
-    canvas.update()
+def update_tabu_list(neighbour):
+    n = len(neighbour)
+    max_tabu_size = n // 2
+    if len(tabu_list) >= max_tabu_size:
+        tabu_list.pop(0)
+    tabu_list.append(neighbour)
 
-# def objective_function():
+def evaluation(total_distance, path, ):
+    global shortest_distance
+    global best_path
+    global end_count
+    if total_distance < shortest_distance:
+        shortest_distance = total_distance
+        best_path = path.copy()
+        end_count = 0
+        return 0
+    print("nezmenila sa")
+    return 1
 
 def change_neighbours(arr):
     neighbour = arr.copy()
     while True:
         index = random.randint(0, len(neighbour) - 2)
         neighbour[index], neighbour[index + 1] = neighbour[index + 1], neighbour[index]
-        if neighbour in tabu_list:
+        if neighbour in tabu_list:  # temporally
             print("tabuuuuu")
         if neighbour not in tabu_list:
             break
-    if len(tabu_list) == 20:
-        tabu_list.pop(0)
-    tabu_list.append(neighbour)
+    update_tabu_list(neighbour)
     return neighbour
 
-
-# first random visit defining initial solution
-def initial_path(townArray, n):
-    random.shuffle(townArray)  # defines first random solution
-    total_distance = 0
-    canvas.create_text(200, 40, text=("Iteration: " + str(iteration_count)), font=("Arial", 22), fill="black")
-    for i in range(len(townArray) - 1):
-        total_distance += city_distance(townArray[i], townArray[i + 1])
-        create_line(townArray[i][0], townArray[i][1], townArray[i + 1][0], townArray[i + 1][1])
-
-    total_distance += city_distance(townArray[n - 1], townArray[0])
-    create_line(townArray[n - 1][0], townArray[n - 1][1], townArray[0][0], townArray[0][1])
-    print("Total distance: ", total_distance)
-    clear_canvas()
-    return total_distance
-
-def tabu_search_alg(recent_path, n):
-    best_distance = 99999999
-    for i in range(1000):
-        path = change_neighbours(recent_path)
-        total_distance = 0
-        for i in range(len(path) - 1):
-            total_distance += city_distance(path[i], path[i + 1])
-            create_line(path[i][0], path[i][1], path[i + 1][0], path[i + 1][1])
-
-        total_distance += city_distance(path[n - 1], path[0])
-        create_line(path[n - 1][0], path[n - 1][1], path[0][0], path[0][1])
-        print("Total distance: ", total_distance)
-        if i != 9:
-            clear_canvas()
-        if best_distance > total_distance:
-            best_distance = total_distance
-    return best_distance
+def tabu_search_alg(init_path, n):
+    path = init_path
+    global end_count
+    max_iterations = 1000
+    max_no_improvement = 50
+    for i in range(max_iterations):
+        path = change_neighbours(path)
+        total_distance = calculate_dist(path)
+        result = evaluation(total_distance, path)
+        end_count += result
+        if end_count >= max_no_improvement:
+            break
+        create_connections(path)
+    show_best_path()
+    return shortest_distance
 
 
 N = 20
 town_coordinates = town_init(N)
-distance = initial_path(town_coordinates, N)
-best_path = town_coordinates
-print("Best distance: ", tabu_search_alg(town_coordinates, N))
+random.shuffle(town_coordinates)  # ensures first iteration is randomly created
+print("Shortest distance: ", tabu_search_alg(town_coordinates, N))
 
 root.mainloop()
