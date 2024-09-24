@@ -4,6 +4,8 @@ import tkinter as tk
 
 root = tk.Tk()
 root.title("Town MAP")
+# Set the window to always be on top
+root.attributes("-topmost", True)
 canvas = tk.Canvas(width=400, height=500, bg="white")
 canvas.pack()
 
@@ -45,8 +47,6 @@ def create_connections(path):
         create_line(path[i][0], path[i][1], path[i + 1][0], path[i + 1][1], "black")
     create_line(path[n - 1][0], path[n - 1][1], path[0][0], path[0][1], "blue")
 
-
-
 # calculating distance using pythagorean theorem
 def city_distance(town1, town2):
     x1, y1 = town1[0], town1[1]
@@ -77,6 +77,7 @@ def calculate_dist(path):
         total_distance += city_distance(path[i], path[i + 1])
     total_distance += city_distance(path[n - 1], path[0])
     print("Total distance: ", total_distance)
+    print(total_distance)
     return total_distance
 
 def update_tabu_list(neighbour):
@@ -86,7 +87,7 @@ def update_tabu_list(neighbour):
         tabu_list.pop(0)
     tabu_list.append(neighbour)
 
-def evaluation(total_distance, path, ):
+def evaluation(total_distance, path):
     global shortest_distance
     global best_path
     global end_count
@@ -127,8 +128,13 @@ def tabu_search_alg(init_path, n):
     return shortest_distance
 
 
-N = 20
+N = 30
 town_coordinates = town_init(N)
+# town_coordinates =[(60, 200), (180, 200), (100, 180), (140, 180),
+#     (20, 160), (80, 160), (200, 160), (140, 140),
+#     (40, 120), (120, 120), (180, 100), (60, 80),
+#     (100, 80), (180, 60), (20, 40), (100, 40),
+#     (200, 40), (20, 20), (60, 20), (160, 20)]
 random.shuffle(town_coordinates)  # ensures first iteration is randomly created
 print("Shortest distance: ", tabu_search_alg(town_coordinates, N))
 
