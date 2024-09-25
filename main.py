@@ -1,12 +1,12 @@
 import random
 import math
-import tkinter as tk
+import tkinter
 
-root = tk.Tk()
+root = tkinter.Tk()
 root.title("Town MAP")
 # Set the window to always be on top
 root.attributes("-topmost", True)
-canvas = tk.Canvas(width=400, height=500, bg="white")
+canvas = tkinter.Canvas(width=400, height=500, bg="white")
 canvas.pack()
 
 DELAY = 0
@@ -76,7 +76,7 @@ def calculate_dist(path):
     for i in range(n - 1):
         total_distance += city_distance(path[i], path[i + 1])
     total_distance += city_distance(path[n - 1], path[0])
-    print("Total distance: ", total_distance)
+    #print("Total distance: ", total_distance)
     print(total_distance)
     return total_distance
 
@@ -96,7 +96,7 @@ def evaluation(total_distance, path):
         best_path = path.copy()
         end_count = 0
         return 0
-    print("nezmenila sa")
+    #print("nezmenila sa")
     return 1
 
 def change_neighbours(arr):
@@ -104,20 +104,21 @@ def change_neighbours(arr):
     while True:
         index = random.randint(0, len(neighbour) - 2)
         neighbour[index], neighbour[index + 1] = neighbour[index + 1], neighbour[index]
-        if neighbour in tabu_list:  # temporally
-            print("tabuuuuu")
+       # if neighbour in tabu_list:  # temporally
+            #print("tabuuuuu")
         if neighbour not in tabu_list:
             break
     update_tabu_list(neighbour)
     return neighbour
 
 def tabu_search_alg(init_path, n):
-    path = init_path
+    global best_path
+    best_path = init_path
     global end_count
     max_iterations = 1000
-    max_no_improvement = 50
+    max_no_improvement = 1000
     for i in range(max_iterations):
-        path = change_neighbours(path)
+        path = change_neighbours(best_path)
         total_distance = calculate_dist(path)
         result = evaluation(total_distance, path)
         end_count += result
@@ -128,13 +129,13 @@ def tabu_search_alg(init_path, n):
     return shortest_distance
 
 
-N = 30
-town_coordinates = town_init(N)
-# town_coordinates =[(60, 200), (180, 200), (100, 180), (140, 180),
-#     (20, 160), (80, 160), (200, 160), (140, 140),
-#     (40, 120), (120, 120), (180, 100), (60, 80),
-#     (100, 80), (180, 60), (20, 40), (100, 40),
-#     (200, 40), (20, 20), (60, 20), (160, 20)]
+N = 20
+#town_coordinates = town_init(N)
+town_coordinates =[(60, 200), (180, 200), (100, 180), (140, 180),
+    (20, 160), (80, 160), (200, 160), (140, 140),
+    (40, 120), (120, 120), (180, 100), (60, 80),
+    (100, 80), (180, 60), (20, 40), (100, 40),
+    (200, 40), (20, 20), (60, 20), (160, 20)]
 random.shuffle(town_coordinates)  # ensures first iteration is randomly created
 print("Shortest distance: ", tabu_search_alg(town_coordinates, N))
 
