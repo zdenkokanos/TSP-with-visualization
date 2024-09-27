@@ -82,7 +82,7 @@ def calculate_dist(path):
 
 def update_tabu_list(neighbour):
     n = len(neighbour)
-    max_tabu_size = n // 2
+    max_tabu_size = 1000
     if len(tabu_list) >= max_tabu_size:
         tabu_list.pop(0)
     tabu_list.append(neighbour)
@@ -115,7 +115,7 @@ def tabu_search_alg(init_path, n):
     global best_path
     best_path = init_path
     global end_count
-    max_iterations = 1000
+    max_iterations = 5000
     max_no_improvement = 1000
     for i in range(max_iterations):
         path = change_neighbours(best_path)
@@ -129,13 +129,13 @@ def tabu_search_alg(init_path, n):
     return shortest_distance
 
 
-N = 20
-#town_coordinates = town_init(N)
-town_coordinates =[(60, 200), (180, 200), (100, 180), (140, 180),
-    (20, 160), (80, 160), (200, 160), (140, 140),
-    (40, 120), (120, 120), (180, 100), (60, 80),
-    (100, 80), (180, 60), (20, 40), (100, 40),
-    (200, 40), (20, 20), (60, 20), (160, 20)]
+N = 10
+town_coordinates = town_init(N)
+# town_coordinates =[(60, 200), (180, 200), (100, 180), (140, 180),
+#     (20, 160), (80, 160), (200, 160), (140, 140),
+#     (40, 120), (120, 120), (180, 100), (60, 80),
+#     (100, 80), (180, 60), (20, 40), (100, 40),
+#     (200, 40), (20, 20), (60, 20), (160, 20)]
 random.shuffle(town_coordinates)  # ensures first iteration is randomly created
 print("Shortest distance: ", tabu_search_alg(town_coordinates, N))
 
