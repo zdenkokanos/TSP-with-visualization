@@ -77,11 +77,10 @@ def calculate_dist(path):
 
 # this adds local maximum to tabu list
 def update_tabu_list(local_max):
-    max_tabu_size = 5000
+    max_tabu_size = 1000
     if len(tabu_list) >= max_tabu_size:
         tabu_list.pop(0)
     if local_max not in tabu_list:
-        print("pridane")
         tabu_list.append(local_max)
 
 def evaluation(total_distance, path, best_path, shortest_dist):
@@ -93,9 +92,10 @@ def evaluation(total_distance, path, best_path, shortest_dist):
 
 def change_neighbours(arr):
     neighbour = arr.copy()
+    n = len(neighbour)
     while True:
-        i = random.randint(0, len(neighbour) - 2)
-        neighbour[i], neighbour[i + 1] = neighbour[i + 1], neighbour[i]
+        i, j = random.sample(range(n), 2)
+        neighbour[i], neighbour[j] = neighbour[j], neighbour[i]
         if neighbour not in tabu_list:
             break
     return neighbour
@@ -103,7 +103,7 @@ def change_neighbours(arr):
 def tabu_search_alg(init_path):
     maximum = 999999999
     max_iterations = 5000
-    max_no_improvement = 1000
+    max_no_improvement = 3000
     end_count = 0
     shortest_dist = maximum
     best_local_dist = maximum
@@ -118,19 +118,22 @@ def tabu_search_alg(init_path):
                 best_local_path = path.copy()
         update_tabu_list(best_local_path)
         result, best_path, shortest_dist = evaluation(best_local_dist, best_local_path, best_path, shortest_dist)
+        print(best_local_dist)
         best_local_dist = maximum
         if result == 0:
             end_count = 0
         else:
             end_count += result
         if end_count >= max_no_improvement:
+            print("stopped")
             break
-        create_connections(best_local_path)
+        if i % 100 == 0:
+            create_connections(best_local_path)
     show_best_path(best_path, shortest_dist)
     return shortest_dist
 
 
-N = 10
+N = 20
 town_coordinates = town_init(N)
 # town_coordinates =[(60, 200), (180, 200), (100, 180), (140, 180),
 #     (20, 160), (80, 160), (200, 160), (140, 140),
