@@ -52,8 +52,8 @@ def city_distance(town1, town2):
     x1, y1 = town1[0], town1[1]
     x2, y2 = town2[0], town2[1]
 
-    a = abs(x1-x2) ** 2
-    b = abs(y1-y2) ** 2
+    a = (x1-x2) ** 2
+    b = (y1-y2) ** 2
     c = math.sqrt(a+b)
     return c
 
@@ -76,16 +76,14 @@ def calculate_dist(path):
     for i in range(n - 1):
         total_distance += city_distance(path[i], path[i + 1])
     total_distance += city_distance(path[n - 1], path[0])
-    #print("Total distance: ", total_distance)
-    print(total_distance)
     return total_distance
 
-def update_tabu_list(neighbour):
-    n = len(neighbour)
+# this adds local maximum to tabu list
+def update_tabu_list(local_max):
     max_tabu_size = 1000
     if len(tabu_list) >= max_tabu_size:
         tabu_list.pop(0)
-    tabu_list.append(neighbour)
+    tabu_list.append(local_max)
 
 def evaluation(total_distance, path):
     global shortest_distance
@@ -96,22 +94,19 @@ def evaluation(total_distance, path):
         best_path = path.copy()
         end_count = 0
         return 0
-    #print("nezmenila sa")
     return 1
 
 def change_neighbours(arr):
     neighbour = arr.copy()
     while True:
-        index = random.randint(0, len(neighbour) - 2)
-        neighbour[index], neighbour[index + 1] = neighbour[index + 1], neighbour[index]
-       # if neighbour in tabu_list:  # temporally
-            #print("tabuuuuu")
+        i = random.randint(0, len(neighbour) - 2)
+        neighbour[i], neighbour[i + 1] = neighbour[i + 1], neighbour[i]
         if neighbour not in tabu_list:
             break
     update_tabu_list(neighbour)
     return neighbour
 
-def tabu_search_alg(init_path, n):
+def tabu_search_alg(init_path):
     global best_path
     best_path = init_path
     global end_count
@@ -137,6 +132,6 @@ town_coordinates = town_init(N)
 #     (100, 80), (180, 60), (20, 40), (100, 40),
 #     (200, 40), (20, 20), (60, 20), (160, 20)]
 random.shuffle(town_coordinates)  # ensures first iteration is randomly created
-print("Shortest distance: ", tabu_search_alg(town_coordinates, N))
+print("Shortest distance: ", tabu_search_alg(town_coordinates))
 
 root.mainloop()
