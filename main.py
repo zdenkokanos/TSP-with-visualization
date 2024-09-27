@@ -1,6 +1,8 @@
 import random
 import math
 import tkinter
+import matplotlib.pyplot as plt
+
 
 root = tkinter.Tk()
 root.title("Town MAP")
@@ -15,6 +17,7 @@ best_path = []
 shortest_distance = 99999999
 tabu_list = []
 end_count = 0
+graph_array = []  # To store total distances for plotting
 
 def clear_canvas():
     global iteration_count
@@ -82,11 +85,12 @@ def calculate_dist(path):
 
 def update_tabu_list(neighbour):
     n = len(neighbour)
-    max_tabu_size = n // 2
+    max_tabu_size = 100
     if len(tabu_list) >= max_tabu_size:
         tabu_list.pop(0)
     tabu_list.append(neighbour)
 
+# evaluates if the total_distance is best overall
 def evaluation(total_distance, path):
     global shortest_distance
     global best_path
@@ -99,6 +103,8 @@ def evaluation(total_distance, path):
     #print("nezmenila sa")
     return 1
 
+# changes adjacent towns in array at random place
+# generates new paths changing neighbours until I find path which is not in tabu list
 def change_neighbours(arr):
     neighbour = arr.copy()
     while True:
@@ -115,11 +121,12 @@ def tabu_search_alg(init_path, n):
     global best_path
     best_path = init_path
     global end_count
-    max_iterations = 1000
+    max_iterations = 5000
     max_no_improvement = 1000
     for i in range(max_iterations):
         path = change_neighbours(best_path)
         total_distance = calculate_dist(path)
+        graph_array.append(total_distance)  # Store distance for graph
         result = evaluation(total_distance, path)
         end_count += result
         if end_count >= max_no_improvement:
@@ -128,15 +135,23 @@ def tabu_search_alg(init_path, n):
     show_best_path()
     return shortest_distance
 
+def plot_graph():
+    plt.plot(graph_array)
+    plt.title('Total Distance over Iterations')
+    plt.xlabel('Iterations')
+    plt.ylabel('Total Distance')
+    plt.grid(True)
+    plt.gca().invert_yaxis()
+    plt.show()
 
+
+# this value is number of towns
 N = 20
-#town_coordinates = town_init(N)
-town_coordinates =[(60, 200), (180, 200), (100, 180), (140, 180),
-    (20, 160), (80, 160), (200, 160), (140, 140),
-    (40, 120), (120, 120), (180, 100), (60, 80),
-    (100, 80), (180, 60), (20, 40), (100, 40),
-    (200, 40), (20, 20), (60, 20), (160, 20)]
+town_coordinates = town_init(N)
 random.shuffle(town_coordinates)  # ensures first iteration is randomly created
+
 print("Shortest distance: ", tabu_search_alg(town_coordinates, N))
+
+plot_graph()  # Plot the graph after search is complete
 
 root.mainloop()
