@@ -10,12 +10,9 @@ canvas = tkinter.Canvas(width=400, height=500, bg="white")
 canvas.pack()
 
 DELAY = 0
-iteration_count = 0
 tabu_list = []
 
-def clear_canvas():
-    global iteration_count
-    iteration_count += 1
+def clear_canvas(iteration_count):
     canvas.delete("all")
     canvas.create_text(200, 40, text=("Iteration: " + str(iteration_count)), font=("Arial", 22), fill="black")
     for town in town_coordinates:
@@ -37,8 +34,8 @@ def show_best_path(best_path, shortest_dist):
         create_line(best_path[i][0], best_path[i][1], best_path[i + 1][0], best_path[i + 1][1], "black")
     create_line(best_path[len(best_path) - 1][0], best_path[len(best_path) - 1][1], best_path[0][0], best_path[0][1], "blue")
 
-def create_connections(path):
-    clear_canvas()
+def create_connections(path, i):
+    clear_canvas(i)
     n = len(path)
     for i in range(n - 1):
         create_line(path[i][0], path[i][1], path[i + 1][0], path[i + 1][1], "black")
@@ -77,7 +74,7 @@ def calculate_dist(path):
 
 # this adds local maximum to tabu list
 def update_tabu_list(local_max):
-    max_tabu_size = 1000
+    max_tabu_size = 100
     if len(tabu_list) >= max_tabu_size:
         tabu_list.pop(0)
     if local_max not in tabu_list:
@@ -100,17 +97,17 @@ def change_neighbours(arr):
             break
     return neighbour
 
-def tabu_search_alg(init_path):
+def tabu_search_alg(init_path, n):
     maximum = 999999999
-    max_iterations = 5000
-    max_no_improvement = 3000
+    max_iterations = 10000
+    max_no_improvement = 5000
     end_count = 0
     shortest_dist = maximum
     best_local_dist = maximum
     best_path = init_path
     best_local_path = []
     for i in range(max_iterations):
-        for j in range(10):
+        for j in range(n):
             path = change_neighbours(best_path)
             total_distance = calculate_dist(path)
             if total_distance < best_local_dist:
@@ -128,7 +125,7 @@ def tabu_search_alg(init_path):
             print("stopped")
             break
         if i % 100 == 0:
-            create_connections(best_local_path)
+            create_connections(best_local_path, i)
     show_best_path(best_path, shortest_dist)
     return shortest_dist
 
@@ -141,6 +138,6 @@ town_coordinates = town_init(N)
 #     (100, 80), (180, 60), (20, 40), (100, 40),
 #     (200, 40), (20, 20), (60, 20), (160, 20)]
 random.shuffle(town_coordinates)  # ensures first iteration is randomly created
-print("Shortest distance: ", tabu_search_alg(town_coordinates))
+print("Shortest distance: ", tabu_search_alg(town_coordinates, N))
 
 root.mainloop()
