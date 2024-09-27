@@ -11,10 +11,7 @@ canvas.pack()
 
 DELAY = 0
 iteration_count = 0
-best_path = []
-shortest_distance = 99999999
 tabu_list = []
-end_count = 0
 
 def clear_canvas():
     global iteration_count
@@ -31,9 +28,9 @@ def create_line(x1, y1, x2, y2, color):
     canvas.after(DELAY)
     canvas.update()
 
-def show_best_path():
+def show_best_path(best_path, shortest_dist):
     canvas.delete("all")
-    canvas.create_text(200, 40, text=f"Best Path Length: {shortest_distance:.2f}", font=("Arial", 22), fill="black")
+    canvas.create_text(200, 40, text=f"Best Path Length: {shortest_dist:.2f}", font=("Arial", 22), fill="black")
     for town in town_coordinates:
         canvas.create_oval(town[0] - 5, town[1] - 5, town[0] + 5, town[1] + 5, fill="red")
     for i in range(len(best_path) - 1):
@@ -80,21 +77,19 @@ def calculate_dist(path):
 
 # this adds local maximum to tabu list
 def update_tabu_list(local_max):
-    max_tabu_size = 1000
+    max_tabu_size = 5000
     if len(tabu_list) >= max_tabu_size:
         tabu_list.pop(0)
-    tabu_list.append(local_max)
+    if local_max not in tabu_list:
+        print("pridane")
+        tabu_list.append(local_max)
 
-def evaluation(total_distance, path):
-    global shortest_distance
-    global best_path
-    global end_count
-    if total_distance < shortest_distance:
-        shortest_distance = total_distance
+def evaluation(total_distance, path, best_path, shortest_dist):
+    if total_distance < shortest_dist:
+        shortest_dist = total_distance
         best_path = path.copy()
-        end_count = 0
-        return 0
-    return 1
+        return 0, best_path, shortest_dist
+    return 1, best_path, shortest_dist
 
 def change_neighbours(arr):
     neighbour = arr.copy()
@@ -103,25 +98,36 @@ def change_neighbours(arr):
         neighbour[i], neighbour[i + 1] = neighbour[i + 1], neighbour[i]
         if neighbour not in tabu_list:
             break
-    update_tabu_list(neighbour)
     return neighbour
 
 def tabu_search_alg(init_path):
-    global best_path
-    best_path = init_path
-    global end_count
+    maximum = 999999999
     max_iterations = 5000
     max_no_improvement = 1000
+    end_count = 0
+    shortest_dist = maximum
+    best_local_dist = maximum
+    best_path = init_path
+    best_local_path = []
     for i in range(max_iterations):
-        path = change_neighbours(best_path)
-        total_distance = calculate_dist(path)
-        result = evaluation(total_distance, path)
-        end_count += result
+        for j in range(10):
+            path = change_neighbours(best_path)
+            total_distance = calculate_dist(path)
+            if total_distance < best_local_dist:
+                best_local_dist = total_distance
+                best_local_path = path.copy()
+        update_tabu_list(best_local_path)
+        result, best_path, shortest_dist = evaluation(best_local_dist, best_local_path, best_path, shortest_dist)
+        best_local_dist = maximum
+        if result == 0:
+            end_count = 0
+        else:
+            end_count += result
         if end_count >= max_no_improvement:
             break
-        create_connections(path)
-    show_best_path()
-    return shortest_distance
+        create_connections(best_local_path)
+    show_best_path(best_path, shortest_dist)
+    return shortest_dist
 
 
 N = 10
