@@ -77,7 +77,6 @@ def update_tabu_list(local_max):
     max_tabu_size = 300
     if len(tabu_list) >= max_tabu_size:
         tabu_list.pop(0)
-        print("max")
     if local_max not in tabu_list:
         tabu_list.append(local_max)
 
