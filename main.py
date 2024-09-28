@@ -112,8 +112,8 @@ def sim_annealing(init_path, n):
     final_path = init_path
     best_local_path = []
     T = 90.00  # initialization
-    cooling = 0.995
-    T_min = 20.00
+    cooling = 0.999
+    T_min = 10.00
     while T > T_min:
         for j in range(n):
             path = change_neighbours(best_path)
@@ -130,14 +130,15 @@ def sim_annealing(init_path, n):
             final_dist = shortest_dist = best_local_dist
         print(best_local_dist)
         best_local_dist = maximum
-        create_connections(best_local_path, i)
+        if i % 100 == 0:
+            create_connections(best_local_path, i)
         T = cool(T, cooling)
         i += 1
     show_best_path(final_path, final_dist)
     return shortest_dist
 
 
-N = 30
+N = 20
 town_coordinates = town_init(N)
 # town_coordinates =[(60, 200), (180, 200), (100, 180), (140, 180),
 #     (20, 160), (80, 160), (200, 160), (140, 140),
