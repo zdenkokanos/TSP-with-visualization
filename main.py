@@ -63,6 +63,7 @@ def town_init(n):
         town_coordinates.append([x, y])
     return town_coordinates
 
+# -------------------------ALGORITHM PART------------------------------- #
 # this is the fitnes function
 def calculate_dist(path):
     total_distance = 0
@@ -72,12 +73,15 @@ def calculate_dist(path):
     total_distance += city_distance(path[n - 1], path[0])
     return total_distance
 
-def evaluation(total_distance, path, best_path, shortest_dist):
-    if total_distance < shortest_dist:
-        shortest_dist = total_distance
-        best_path = path.copy()
-        return 0, best_path, shortest_dist
-    return 1, best_path, shortest_dist
+def evaluation(total_distance, path, best_path, shortest_dist, T, final_dist, final_path):
+    probability = T / 100
+    if total_distance < final_path:
+        final_dist = total_distance
+        final_path = path.copy()
+        return final_path, final_dist
+    else:
+
+        return best_path, shortest_dist
 
 def change_neighbours(arr):
     neighbour = arr.copy()
@@ -89,16 +93,51 @@ def change_neighbours(arr):
             break
     return neighbour
 
+def probability(T):
+    percentage = T/100
+    if random.random() < percentage:
+        return 0
+    return 1
+
+def cool(T, cooling):
+    return T * cooling
+
 def sim_annealing(init_path, n):
+    maximum = 999999999
+    i = 0
+    shortest_dist = maximum
+    best_local_dist = maximum
+    best_path = init_path
+    final_dist = maximum  # final shortest distance
+    final_path = init_path
+    best_local_path = []
     T = 90.00  # initialization
     cooling = 0.995
-    T_min = 30.00
+    T_min = 20.00
     while T > T_min:
-        T *= cooling
+        for j in range(n):
+            path = change_neighbours(best_path)
+            total_distance = calculate_dist(path)
+            if total_distance < best_local_dist:
+                best_local_dist = total_distance
+                best_local_path = path.copy()
+        if final_dist < best_local_dist:
+            if probability(T):
+                best_path = best_local_path.copy()
+                shortest_dist = best_local_dist
+        else:
+            final_path = best_path = best_local_path.copy()
+            final_dist = shortest_dist = best_local_dist
+        print(best_local_dist)
+        best_local_dist = maximum
+        create_connections(best_local_path, i)
+        T = cool(T, cooling)
+        i += 1
+    show_best_path(final_path, final_dist)
+    return shortest_dist
 
 
-
-N = 20
+N = 30
 town_coordinates = town_init(N)
 # town_coordinates =[(60, 200), (180, 200), (100, 180), (140, 180),
 #     (20, 160), (80, 160), (200, 160), (140, 140),
