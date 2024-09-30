@@ -74,7 +74,7 @@ def calculate_dist(path):
 
 # this adds local maximum to tabu list
 def update_tabu_list(local_max):
-    max_tabu_size = 300
+    max_tabu_size = 100
     if len(tabu_list) >= max_tabu_size:
         tabu_list.pop(0)
     if local_max not in tabu_list:
@@ -99,8 +99,8 @@ def change_neighbours(arr):
 
 def tabu_search_alg(init_path, n):
     maximum = 999999999
-    max_iterations = 15000
-    max_no_improvement = 10000
+    max_iterations = 10000
+    max_no_improvement = 5000
     end_count = 0
     shortest_dist = maximum
     best_local_dist = maximum
@@ -124,13 +124,13 @@ def tabu_search_alg(init_path, n):
         if end_count >= max_no_improvement:
             print("stopped")
             break
-        if i % 100 == 0:
+        if i % 500 == 0:
             create_connections(best_local_path, i)
     show_best_path(best_path, shortest_dist)
     return shortest_dist
 
 
-N = 20
+N = 30
 town_coordinates = town_init(N)
 # town_coordinates =[(60, 200), (180, 200), (100, 180), (140, 180),
 #     (20, 160), (80, 160), (200, 160), (140, 140),
