@@ -25,14 +25,14 @@ def create_line(x1, y1, x2, y2, color):
     canvas.after(DELAY)
     canvas.update()
 
-def show_best_path(best_path, shortest_dist):
+def show_global_optimum(global_optimum, global_opt_dist):
     canvas.delete("all")
-    canvas.create_text(200, 40, text=f"Best Path Length: {shortest_dist:.2f}", font=("Arial", 22), fill="black")
+    canvas.create_text(200, 40, text=f"Best Path Length: {global_opt_dist:.2f}", font=("Arial", 22), fill="black")
     for town in town_coordinates:
         canvas.create_oval(town[0] - 5, town[1] - 5, town[0] + 5, town[1] + 5, fill="red")
-    for i in range(len(best_path) - 1):
-        create_line(best_path[i][0], best_path[i][1], best_path[i + 1][0], best_path[i + 1][1], "black")
-    create_line(best_path[len(best_path) - 1][0], best_path[len(best_path) - 1][1], best_path[0][0], best_path[0][1], "blue")
+    for i in range(len(global_optimum) - 1):
+        create_line(global_optimum[i][0], global_optimum[i][1], global_optimum[i + 1][0], global_optimum[i + 1][1], "black")
+    create_line(global_optimum[len(global_optimum) - 1][0], global_optimum[len(global_optimum) - 1][1], global_optimum[0][0], global_optimum[0][1], "blue")
 
 def create_connections(path, i):
     clear_canvas(i)
@@ -74,18 +74,18 @@ def calculate_dist(path):
 
 # this adds local maximum to tabu list
 def update_tabu_list(local_max):
-    max_tabu_size = 100
+    max_tabu_size = 10000
     if len(tabu_list) >= max_tabu_size:
         tabu_list.pop(0)
     if local_max not in tabu_list:
         tabu_list.append(local_max)
 
-def evaluation(total_distance, path, best_path, shortest_dist):
-    if total_distance < shortest_dist:
-        shortest_dist = total_distance
-        best_path = path.copy()
-        return 0, best_path, shortest_dist
-    return 1, best_path, shortest_dist
+def evaluation(total_distance, path, global_optimum, global_opt_dist):
+    if total_distance < global_opt_dist:
+        global_opt_dist = total_distance
+        global_optimum = path.copy()
+        return 0, global_optimum, global_opt_dist
+    return 1, global_optimum, global_opt_dist
 
 def change_neighbours(arr):
     neighbour = arr.copy()
@@ -98,25 +98,23 @@ def change_neighbours(arr):
     return neighbour
 
 def tabu_search_alg(init_path, n):
-    maximum = 999999999
-    max_iterations = 10000
-    max_no_improvement = 5000
+    max_iterations = 15000
+    max_no_improvement = 15000
     end_count = 0
-    shortest_dist = maximum
-    best_local_dist = maximum
-    best_path = init_path
-    best_local_path = []
+    global_opt_dist = calculate_dist(init_path)
+    local_opt_dist = calculate_dist(init_path)
+    global_optimum = init_path.copy()
+    local_optimum = init_path.copy()
     for i in range(max_iterations):
-        for j in range(n):
-            path = change_neighbours(best_path)
+        for j in range(90):
+            path = change_neighbours(local_optimum)
             total_distance = calculate_dist(path)
-            if total_distance < best_local_dist:
-                best_local_dist = total_distance
-                best_local_path = path.copy()
-        update_tabu_list(best_local_path)
-        result, best_path, shortest_dist = evaluation(best_local_dist, best_local_path, best_path, shortest_dist)
-        print(best_local_dist)
-        best_local_dist = maximum
+            if total_distance < local_opt_dist:
+                local_opt_dist = total_distance
+                local_optimum = path.copy()
+        update_tabu_list(local_optimum)
+        result, global_optimum, global_opt_dist = evaluation(local_opt_dist, local_optimum, global_optimum, global_opt_dist)
+        print(local_opt_dist)
         if result == 0:
             end_count = 0
         else:
@@ -125,9 +123,9 @@ def tabu_search_alg(init_path, n):
             print("stopped")
             break
         if i % 500 == 0:
-            create_connections(best_local_path, i)
-    show_best_path(best_path, shortest_dist)
-    return shortest_dist
+            create_connections(local_optimum, i)
+    show_global_optimum(global_optimum, global_opt_dist)
+    return global_opt_dist
 
 
 N = 30
