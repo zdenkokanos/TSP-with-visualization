@@ -10,8 +10,6 @@ canvas = tkinter.Canvas(width=400, height=500, bg="white")
 canvas.pack()
 
 DELAY = 0
-tabu_list = []
-
 def clear_canvas(iteration_count):
     canvas.delete("all")
     canvas.create_text(200, 40, text=("Iteration: " + str(iteration_count)), font=("Arial", 22), fill="black")
@@ -73,24 +71,12 @@ def fitness(path):
     total_distance += city_distance(path[n - 1], path[0])
     return total_distance
 
-def evaluation(total_distance, path, best_path, shortest_dist, T, final_dist, final_path):
-    probability = T / 100
-    if total_distance < final_path:
-        final_dist = total_distance
-        final_path = path.copy()
-        return final_path, final_dist
-    else:
-
-        return best_path, shortest_dist
-
 def change_neighbours(arr):
     neighbour = arr.copy()
     n = len(neighbour)
-    while True:
-        i, j = random.sample(range(n), 2)
-        neighbour[i], neighbour[j] = neighbour[j], neighbour[i]
-        if neighbour not in tabu_list:
-            break
+    i, j = sorted(random.sample(range(n), 2))  # i and j must be sorted, so we always start from left
+    # I chose the mutation from lecture: "substring order inversion"
+    neighbour[i:j + 1] = reversed(neighbour[i:j + 1])
     return neighbour
 
 def probability(T, last_value, new_value):
@@ -111,7 +97,7 @@ def sim_annealing(init_path, n):
     best_path = init_path
     T = 90.00  # initialization
     cooling = 0.999
-    T_min = 10.00
+    T_min = 30.00
     while T > T_min:
         for j in range(n):
             path = change_neighbours(best_path)
