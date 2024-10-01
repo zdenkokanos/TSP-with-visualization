@@ -76,7 +76,7 @@ def fitness(path):
 
 # this adds local maximum to tabu list
 def update_tabu_list(local_max):
-    max_tabu_size = 10
+    max_tabu_size = 20
     if len(tabu_list) >= max_tabu_size:
         tabu_list.pop(0)
     tabu_list.append(local_max)
@@ -87,18 +87,14 @@ def evaluation(path, best_path):
         return 0, best_path
     return 1, best_path
 
-
+# this function makes mutations of the path
 def change_neighbours(arr):
     neighbour = arr.copy()
     n = len(neighbour)
     while True:
-        # Try more complex swaps or reverse a segment
-        if random.random() > 0.5:  # Reverse a segment (2-opt move)
-            i, j = sorted(random.sample(range(n), 2))
-            neighbour[i:j + 1] = reversed(neighbour[i:j + 1])
-        else:  # Regular swap (your current implementation)
-            i, j = random.sample(range(n), 2)
-            neighbour[i], neighbour[j] = neighbour[j], neighbour[i]
+        i, j = sorted(random.sample(range(n), 2))  # i and j must be sorted, so we always start from left
+        # I chose the mutation from lecture: "substring order inversion"
+        neighbour[i:j + 1] = reversed(neighbour[i:j + 1])
 
         if neighbour not in tabu_list:
             break
@@ -132,7 +128,7 @@ def tabu_search_alg(init_path, n):
     return fitness(best_path)
 
 
-N = 40
+N = 30
 town_coordinates = town_init(N)
 # town_coordinates = [(94, 390), (348, 390), (179, 359), (263, 359),
 #     (10, 328), (137, 328), (390, 328), (263, 297),
