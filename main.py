@@ -74,7 +74,7 @@ def calculate_dist(path):
 
 # this adds local maximum to tabu list
 def update_tabu_list(local_max):
-    max_tabu_size = 10
+    max_tabu_size = 100
     if len(tabu_list) >= max_tabu_size:
         tabu_list.pop(0)
     tabu_list.append(local_max)
@@ -112,10 +112,10 @@ def tabu_search_alg(init_path, n):
             if total_distance < best_local_dist:
                 best_local_dist = total_distance
                 best_local_path = path.copy()
-        update_tabu_list(best_local_path)
         result, best_path, shortest_dist = evaluation(best_local_dist, best_local_path, best_path, shortest_dist)
         print(best_local_dist)
         best_local_dist = maximum
+        update_tabu_list(best_local_path)
         if result == 0:
             end_count = 0
         else:
