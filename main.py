@@ -25,7 +25,8 @@ def create_line(x1, y1, x2, y2, color):
     canvas.after(DELAY)
     canvas.update()
 
-def show_best_path(best_path, shortest_dist):
+def show_best_path(best_path):
+    shortest_dist = fitness(best_path)
     canvas.delete("all")
     canvas.create_text(200, 40, text=f"Best Path Length: {shortest_dist:.2f}", font=("Arial", 22), fill="black")
     for town in town_coordinates:
@@ -64,8 +65,7 @@ def town_init(n):
     return town_coordinates
 
 # -------------------------ALGORITHM PART------------------------------- #
-# this is the fitnes function
-def calculate_dist(path):
+def fitness(path):
     total_distance = 0
     n = len(path)
     for i in range(n - 1):
@@ -105,39 +105,30 @@ def cool(T, cooling):
     return T * cooling
 
 def sim_annealing(init_path, n):
-    maximum = 999999999
     i = 0
-    shortest_dist = maximum
-    best_local_dist = maximum
-    best_path = init_path
-    final_dist = maximum  # final shortest distance
     final_path = init_path
-    best_local_path = []
+    best_candidate = init_path
+    best_path = init_path
     T = 90.00  # initialization
     cooling = 0.999
     T_min = 10.00
     while T > T_min:
         for j in range(n):
             path = change_neighbours(best_path)
-            total_distance = calculate_dist(path)
-            if total_distance < best_local_dist:
-                best_local_dist = total_distance
-                best_local_path = path.copy()
-        if final_dist < best_local_dist:
-            if probability(T, shortest_dist, best_local_dist):
-                best_path = best_local_path.copy()
-                shortest_dist = best_local_dist
+            if fitness(path) < fitness(best_path):
+                best_candidate = path.copy()
+        if fitness(final_path) < fitness(best_candidate):
+            if probability(T, fitness(best_path), fitness(best_candidate)):
+                best_path = best_candidate.copy()
         else:
-            final_path = best_path = best_local_path.copy()
-            final_dist = shortest_dist = best_local_dist
-        print(best_local_dist)
-        best_local_dist = maximum
+            final_path = best_path = best_candidate.copy()
+        print(fitness(best_candidate))
         if i % 300 == 0:
-            create_connections(best_local_path, i)
+            create_connections(best_candidate, i)
         T = cool(T, cooling)
         i += 1
-    show_best_path(final_path, final_dist)
-    return shortest_dist
+    show_best_path(final_path)
+    return fitness(final_path)
 
 
 N = 30
