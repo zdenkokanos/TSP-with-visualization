@@ -78,7 +78,7 @@ def fitness(path):
 
 # this adds local maximum to tabu list
 def update_tabu_list(local_max):
-    max_tabu_size = 10
+    max_tabu_size = 1
     if len(tabu_list) >= max_tabu_size:
         tabu_list.pop(0)
     tabu_list.append(local_max)
@@ -104,7 +104,7 @@ def change_neighbours(arr):
 
 def tabu_search_alg(init_path, n):
     max_iterations = 1000
-    max_no_improvement = 50
+    max_no_improvement = 100
     end_count = 0
     best_overall = init_path
     candidate = init_path
@@ -119,7 +119,7 @@ def tabu_search_alg(init_path, n):
             best_candidate = candidate.copy()               # better than actual I start to search in it
         result, best_overall = evaluation(best_candidate, best_overall)  # I check if the value is best from all so far
         print(fitness(candidate))
-        graph_array.append(fitness(candidate))
+        graph_array.append(fitness(best_candidate))
         update_tabu_list(best_candidate)
         if result == 0:  # this is just to keep track of not improving anymore
             end_count = 0
@@ -142,7 +142,7 @@ def plot_graph():
     plt.show()
 
 
-N = 40
+N = 100
 town_coordinates = town_init(N)
 # town_coordinates = [(94, 390), (348, 390), (179, 359), (263, 359),
 #     (10, 328), (137, 328), (390, 328), (263, 297),
