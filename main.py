@@ -1,6 +1,7 @@
 import random
 import math
 import tkinter
+import matplotlib.pyplot as plt
 
 root = tkinter.Tk()
 root.title("Town MAP")
@@ -8,6 +9,7 @@ root.title("Town MAP")
 root.attributes("-topmost", True)
 canvas = tkinter.Canvas(width=400, height=500, bg="white")
 canvas.pack()
+graph_array = []  # To store total distances for plotting
 
 DELAY = 0
 def clear_canvas(iteration_count):
@@ -109,6 +111,7 @@ def sim_annealing(init_path, n):
         else:
             final_path = best_path = best_candidate.copy()
         print(fitness(best_candidate))
+        graph_array.append(fitness(best_candidate))
         if i % 200 == 0:
             create_connections(best_candidate, i)
         T = cool(T, cooling)
@@ -116,8 +119,16 @@ def sim_annealing(init_path, n):
     show_best_path(final_path)
     return fitness(final_path)
 
+def plot_graph():
+    plt.plot(graph_array)
+    plt.title('Total Distance over Iterations')
+    plt.xlabel('Iterations')
+    plt.ylabel('Total Distance')
+    plt.grid(True)
+    plt.show()
 
-N = 100
+
+N = 40
 town_coordinates = town_init(N)
 # town_coordinates =[(60, 200), (180, 200), (100, 180), (140, 180),
 #     (20, 160), (80, 160), (200, 160), (140, 140),
@@ -126,5 +137,5 @@ town_coordinates = town_init(N)
 #     (200, 40), (20, 20), (60, 20), (160, 20)]
 random.shuffle(town_coordinates)  # ensures first iteration is randomly created
 print("Shortest distance: ", sim_annealing(town_coordinates, N))
-
+plot_graph()
 root.mainloop()
