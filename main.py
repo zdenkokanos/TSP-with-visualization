@@ -111,8 +111,8 @@ def sim_annealing(init_path, n):
                 best_path = best_candidate.copy()
         else:
             final_path = best_path = best_candidate.copy()
-        print(fitness(best_candidate))
-        graph_array.append(fitness(best_candidate))
+        print(fitness(best_path))
+        graph_array.append(fitness(best_path))
         if i % 100 == 0:
             create_connections(best_candidate, i)
         T = cool(T, cooling)
