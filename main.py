@@ -129,7 +129,7 @@ def tabu_search_alg(init_path, n):
             break
         if i % 100 == 0:  # creates visualisation of every 200th path
             create_connections(best_candidate, i)
-        candidate = init_path.copy()
+        candidate = init_path.copy()  # this achieves reset of the value in the next generation
     show_best_overall(best_overall)
     return fitness(best_overall)
 
