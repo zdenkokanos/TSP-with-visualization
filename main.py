@@ -86,6 +86,7 @@ def probability(T, last_value, new_value):
     prob = math.exp(-delta_E / T)
     print("prob:", prob)
     if random.random() < prob:
+        print("was here")
         return True
     return False
 
@@ -98,16 +99,17 @@ def sim_annealing(init_path, n):
     best_candidate = init_path
     best_path = init_path
     T = 90.00  # initialization
-    cooling = 0.998
+    cooling = 0.999
     T_min = 30.00
     while T > T_min:
-        for j in range(n):
+        for j in range(5):  # I create n individuals
             path = change_neighbours(best_path)
-            if fitness(path) < fitness(best_path):
-                best_candidate = path.copy()
+            if fitness(path) < fitness(best_candidate):
+                best_candidate = path.copy()  # this takes the best one created from neighbour-hood
         if fitness(final_path) < fitness(best_candidate):
             if probability(T, fitness(best_path), fitness(best_candidate)):
                 best_path = best_candidate.copy()
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!")
         else:
             final_path = best_path = best_candidate.copy()
         print(fitness(best_candidate))
@@ -116,6 +118,7 @@ def sim_annealing(init_path, n):
             create_connections(best_candidate, i)
         T = cool(T, cooling)
         i += 1
+        best_candidate = init_path.copy()  # ma to byt nema to byt??
     show_best_path(final_path)
     return fitness(final_path)
 
