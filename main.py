@@ -111,7 +111,7 @@ def tabu_search_alg(init_path, n):
     best_candidate = init_path
     update_tabu_list(best_candidate)
     for i in range(max_iterations):
-        for j in range(5):  # I create n individuals, which are not in tabu list
+        for j in range(n):  # I create n individuals, which are not in tabu list
             path = change_neighbours(best_candidate)
             if fitness(path) < fitness(best_candidate):  # choose the best one
                 candidate = path.copy()
@@ -140,7 +140,8 @@ def plot_graph():
     plt.grid(True)
     plt.show()
 
-N = 20
+
+N = 100
 town_coordinates = town_init(N)
 # town_coordinates = [(94, 390), (348, 390), (179, 359), (263, 359),
 #     (10, 328), (137, 328), (390, 328), (263, 297),
