@@ -1,6 +1,7 @@
 import random
 import math
 import tkinter
+import matplotlib.pyplot as plt
 
 root = tkinter.Tk()
 root.title("Town MAP")
@@ -11,6 +12,7 @@ canvas.pack()
 
 DELAY = 0
 tabu_list = []
+graph_array = []
 
 def clear_canvas(iteration_count):
     canvas.delete("all")
@@ -108,12 +110,18 @@ def tabu_search_alg(init_path, n):
     best_candidate = init_path
     update_tabu_list(best_candidate)
     for i in range(max_iterations):
-        for j in range(20):
+        for j in range(20):  # Explore neighborhood
             path = change_neighbours(best_candidate)
-            if fitness(path) < fitness(best_candidate):
+            # If the new candidate is better, or not in Tabu, or satisfies aspiration criteria
+            if fitness(path) < fitness(best_candidate) or (path not in tabu_list):
+                best_candidate = path.copy()
+
+            # Aspiration criteria: if the candidate is in Tabu list but better than the best solution so far
+            if path in tabu_list and fitness(path) < fitness(best_path):
                 best_candidate = path.copy()
         result, best_path = evaluation(best_candidate, best_path)
         print(fitness(best_candidate))
+        graph_array.append(fitness(best_candidate))
         update_tabu_list(best_candidate)
         if result == 0:
             end_count = 0
@@ -127,6 +135,13 @@ def tabu_search_alg(init_path, n):
     show_best_path(best_path)
     return fitness(best_path)
 
+def plot_graph():
+    plt.plot(graph_array)
+    plt.title('Total Distance over Iterations')
+    plt.xlabel('Iterations')
+    plt.ylabel('Total Distance')
+    plt.grid(True)
+    plt.show()
 
 N = 40
 town_coordinates = town_init(N)
@@ -137,5 +152,5 @@ town_coordinates = town_init(N)
 #     (390, 141), (10, 110), (94, 110), (306, 110)]
 random.shuffle(town_coordinates)  # ensures first iteration is randomly created
 print("Shortest distance: ", tabu_search_alg(town_coordinates, N))
-
+plot_graph()
 root.mainloop()
