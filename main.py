@@ -113,13 +113,13 @@ def tabu_search_alg(init_path, n):
     for i in range(max_iterations):
         for j in range(n):  # I create n individuals, which are not in tabu list
             path = change_neighbours(best_candidate)
-            if fitness(path) < fitness(best_candidate):  # choose the best one
+            if fitness(path) < fitness(candidate):  # choose the best one
                 candidate = path.copy()
         if fitness(candidate) < fitness(best_candidate):    # if the individual from the chosen is
             best_candidate = candidate.copy()               # better than actual I start to search in it
         result, best_overall = evaluation(best_candidate, best_overall)  # I check if the value is best from all so far
         print(fitness(candidate))
-        graph_array.append(fitness(best_candidate))
+        graph_array.append(fitness(candidate))
         update_tabu_list(best_candidate)
         if result == 0:  # this is just to keep track of not improving anymore
             end_count = 0
@@ -129,6 +129,7 @@ def tabu_search_alg(init_path, n):
             break
         if i % 100 == 0:  # creates visualisation of every 200th path
             create_connections(best_candidate, i)
+        candidate = init_path.copy()
     show_best_overall(best_overall)
     return fitness(best_overall)
 
@@ -141,7 +142,7 @@ def plot_graph():
     plt.show()
 
 
-N = 100
+N = 40
 town_coordinates = town_init(N)
 # town_coordinates = [(94, 390), (348, 390), (179, 359), (263, 359),
 #     (10, 328), (137, 328), (390, 328), (263, 297),
