@@ -130,7 +130,7 @@ def plot_graph():
     plt.show()
 
 
-N = 40
+N = 100
 town_coordinates = town_init(N)
 # town_coordinates =[(60, 200), (180, 200), (100, 180), (140, 180),
 #     (20, 160), (80, 160), (200, 160), (140, 140),
