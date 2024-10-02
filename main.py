@@ -96,7 +96,7 @@ def sim_annealing(init_path, n):
     best_candidate = init_path
     best_path = init_path
     T = 90.00  # initialization
-    cooling = 0.999
+    cooling = 0.998
     T_min = 30.00
     while T > T_min:
         for j in range(n):
@@ -109,7 +109,7 @@ def sim_annealing(init_path, n):
         else:
             final_path = best_path = best_candidate.copy()
         print(fitness(best_candidate))
-        if i % 300 == 0:
+        if i % 200 == 0:
             create_connections(best_candidate, i)
         T = cool(T, cooling)
         i += 1
@@ -117,7 +117,7 @@ def sim_annealing(init_path, n):
     return fitness(final_path)
 
 
-N = 30
+N = 100
 town_coordinates = town_init(N)
 # town_coordinates =[(60, 200), (180, 200), (100, 180), (140, 180),
 #     (20, 160), (80, 160), (200, 160), (140, 140),
