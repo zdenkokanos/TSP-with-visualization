@@ -1,7 +1,6 @@
 import random
 import math
 import tkinter
-import matplotlib.pyplot as plt
 
 root = tkinter.Tk()
 root.title("Town MAP")
@@ -12,7 +11,6 @@ canvas.pack()
 
 DELAY = 0
 tabu_list = []
-graph_array = []
 
 def clear_canvas(iteration_count):
     canvas.delete("all")
@@ -22,13 +20,12 @@ def clear_canvas(iteration_count):
 
 # creates visible connections between cities
 def create_line(x1, y1, x2, y2, color):
+    global DELAY
     canvas.create_line(x1, y1, x2, y2, fill=color)
     canvas.after(DELAY)
     canvas.update()
 
-# this function shows visualization of the best path found during the algorithm search
-def show_best_path(best_path):
-    shortest_dist = fitness(best_path)
+def show_best_path(best_path, shortest_dist):
     canvas.delete("all")
     canvas.create_text(200, 40, text=f"Best Path Length: {shortest_dist:.2f}", font=("Arial", 22), fill="black")
     for town in town_coordinates:
@@ -37,7 +34,6 @@ def show_best_path(best_path):
         create_line(best_path[i][0], best_path[i][1], best_path[i + 1][0], best_path[i + 1][1], "black")
     create_line(best_path[len(best_path) - 1][0], best_path[len(best_path) - 1][1], best_path[0][0], best_path[0][1], "blue")
 
-# this function creates lines between nodes (cities), last line is blue to be sure it came back to starting point
 def create_connections(path, i):
     clear_canvas(i)
     n = len(path)
@@ -67,7 +63,6 @@ def town_init(n):
         town_coordinates.append([x, y])
     return town_coordinates
 
-# this is the fitness function
 def fitness(path):
     total_distance = 0
     n = len(path)
@@ -78,18 +73,19 @@ def fitness(path):
 
 # this adds local maximum to tabu list
 def update_tabu_list(local_max):
-    max_tabu_size = 20
+    max_tabu_size = 10
     if len(tabu_list) >= max_tabu_size:
         tabu_list.pop(0)
-    tabu_list.append(local_max)
+    if local_max not in tabu_list:
+        tabu_list.append(local_max)
 
-def evaluation(path, best_path):
-    if fitness(path) < fitness(best_path):
+def evaluation(total_distance, path, best_path, shortest_dist):
+    if total_distance < shortest_dist:
+        shortest_dist = total_distance
         best_path = path.copy()
-        return 0, best_path
-    return 1, best_path
+        return 0, best_path, shortest_dist
+    return 1, best_path, shortest_dist
 
-# this function makes mutations of the path
 def change_neighbours(arr):
     neighbour = arr.copy()
     n = len(neighbour)
@@ -103,54 +99,46 @@ def change_neighbours(arr):
     return neighbour
 
 def tabu_search_alg(init_path, n):
-    max_iterations = 1000
+    maximum = 999999999
+    max_iterations = 5000
     max_no_improvement = 50
     end_count = 0
+    shortest_dist = maximum
+    best_local_dist = maximum
     best_path = init_path
-    best_candidate = init_path
-    update_tabu_list(best_candidate)
+    best_local_path = []
     for i in range(max_iterations):
-        for j in range(20):  # Explore neighborhood
-            path = change_neighbours(best_candidate)
-            # If the new candidate is better, or not in Tabu, or satisfies aspiration criteria
-            if fitness(path) < fitness(best_candidate) or (path not in tabu_list):
-                best_candidate = path.copy()
-
-            # Aspiration criteria: if the candidate is in Tabu list but better than the best solution so far
-            if path in tabu_list and fitness(path) < fitness(best_path):
-                best_candidate = path.copy()
-        result, best_path = evaluation(best_candidate, best_path)
-        print(fitness(best_candidate))
-        graph_array.append(fitness(best_candidate))
-        update_tabu_list(best_candidate)
+        for j in range(n):
+            path = change_neighbours(best_path)
+            total_distance = fitness(path)
+            if total_distance < best_local_dist:
+                best_local_dist = total_distance
+                best_local_path = path.copy()
+        update_tabu_list(best_local_path)
+        result, best_path, shortest_dist = evaluation(best_local_dist, best_local_path, best_path, shortest_dist)
+        print(best_local_dist)
+        best_local_dist = maximum
         if result == 0:
             end_count = 0
         else:
             end_count += result
         if end_count >= max_no_improvement:
+            print("stopped")
             break
-        if i % 100 == 0:  # creates visualisation of every 200th path
-            create_connections(best_candidate, i)
-        print("i = ", i)
-    show_best_path(best_path)
-    return fitness(best_path)
+        if i % 100 == 0:
+            create_connections(best_local_path, i)
+    show_best_path(best_path, shortest_dist)
+    return shortest_dist
 
-def plot_graph():
-    plt.plot(graph_array)
-    plt.title('Total Distance over Iterations')
-    plt.xlabel('Iterations')
-    plt.ylabel('Total Distance')
-    plt.grid(True)
-    plt.show()
 
-N = 40
+N = 100
 town_coordinates = town_init(N)
-# town_coordinates = [(94, 390), (348, 390), (179, 359), (263, 359),
-#     (10, 328), (137, 328), (390, 328), (263, 297),
-#     (52, 266), (221, 266), (348, 234), (94, 203),
-#     (179, 203), (348, 172), (10, 141), (179, 141),
-#     (390, 141), (10, 110), (94, 110), (306, 110)]
+# town_coordinates =[(60, 200), (180, 200), (100, 180), (140, 180),
+#     (20, 160), (80, 160), (200, 160), (140, 140),
+#     (40, 120), (120, 120), (180, 100), (60, 80),
+#     (100, 80), (180, 60), (20, 40), (100, 40),
+#     (200, 40), (20, 20), (60, 20), (160, 20)]
 random.shuffle(town_coordinates)  # ensures first iteration is randomly created
 print("Shortest distance: ", tabu_search_alg(town_coordinates, N))
-plot_graph()
+
 root.mainloop()
