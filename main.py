@@ -101,14 +101,14 @@ def change_neighbours(arr):
     return neighbour
 
 def tabu_search_alg(init_path, n):
-    max_iterations = 200
-    max_no_improvement = 20
+    max_iterations = 1000
+    max_no_improvement = 50
     end_count = 0
     best_path = init_path
     best_candidate = init_path
     update_tabu_list(best_candidate)
     for i in range(max_iterations):
-        for j in range(n):
+        for j in range(20):
             path = change_neighbours(best_candidate)
             if fitness(path) < fitness(best_candidate):
                 best_candidate = path.copy()
@@ -121,14 +121,14 @@ def tabu_search_alg(init_path, n):
             end_count += result
         if end_count >= max_no_improvement:
             break
-        if i % 20 == 0:  # creates visualisation of every 200th path
+        if i % 100 == 0:  # creates visualisation of every 200th path
             create_connections(best_candidate, i)
         print("i = ", i)
     show_best_path(best_path)
     return fitness(best_path)
 
 
-N = 30
+N = 40
 town_coordinates = town_init(N)
 # town_coordinates = [(94, 390), (348, 390), (179, 359), (263, 359),
 #     (10, 328), (137, 328), (390, 328), (263, 297),
