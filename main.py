@@ -106,9 +106,9 @@ def tabu_search_alg(init_path, n):
     max_iterations = 1000
     max_no_improvement = 100
     end_count = 0
-    best_overall = init_path
-    candidate = init_path
-    best_candidate = init_path
+    best_overall = init_path.copy()
+    candidate = init_path.copy()
+    best_candidate = init_path.copy()
     update_tabu_list(best_candidate)
     for i in range(max_iterations):
         for j in range(n):  # I create n individuals, which are not in tabu list
