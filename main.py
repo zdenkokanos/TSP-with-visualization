@@ -12,7 +12,7 @@ canvas.pack()
 
 DELAY = 0
 tabu_list = []
-graph_array = []
+graph_array = []  # To store total distances for plotting
 
 def clear_canvas(iteration_count):
     canvas.delete("all")
@@ -45,6 +45,8 @@ def create_connections(path, i):
         create_line(path[i][0], path[i][1], path[i + 1][0], path[i + 1][1], "black")
     create_line(path[n - 1][0], path[n - 1][1], path[0][0], path[0][1], "blue")
 
+# -------------------------ALGORITHM PART------------------------------- #
+
 # calculating distance using pythagorean theorem
 def city_distance(town1, town2):
     x1, y1 = town1[0], town1[1]
@@ -67,7 +69,6 @@ def town_init(n):
         town_coordinates.append([x, y])
     return town_coordinates
 
-# this is the fitness function
 def fitness(path):
     total_distance = 0
     n = len(path)
@@ -76,9 +77,9 @@ def fitness(path):
     total_distance += city_distance(path[n - 1], path[0])
     return total_distance
 
-# this adds local maximum to tabu list
+# this adds values to the tabu list and ensures that if it is full the oldest value is popped
 def update_tabu_list(local_max):
-    max_tabu_size = 1
+    max_tabu_size = 10
     if len(tabu_list) >= max_tabu_size:
         tabu_list.pop(0)
     tabu_list.append(local_max)
@@ -89,7 +90,7 @@ def evaluation(path, best_overall):
         return 0, best_overall
     return 1, best_overall
 
-# this function makes mutations of the path
+# this function switches the order of towns in which they are visited, I use substring order inversion for this task
 def change_neighbours(arr):
     neighbour = arr.copy()
     n = len(neighbour)
@@ -102,6 +103,7 @@ def change_neighbours(arr):
             break
     return neighbour
 
+# this is the main part of the algorithm
 def tabu_search_alg(init_path, n):
     max_iterations = 1000
     max_no_improvement = 100
@@ -127,12 +129,13 @@ def tabu_search_alg(init_path, n):
             end_count += result
         if end_count == max_no_improvement:
             break
-        if i % 100 == 0:  # creates visualisation of every 200th path
+        if i % 100 == 0:  # creates visualisation of every 100th path
             create_connections(best_candidate, i)
         candidate = init_path.copy()  # this achieves reset of the value in the next generation
     show_best_overall(best_overall)
     return fitness(best_overall)
 
+# this function just creates graph to better visualise the correct solution
 def plot_graph():
     plt.plot(graph_array)
     plt.title('Total Distance over Iterations')
@@ -142,13 +145,8 @@ def plot_graph():
     plt.show()
 
 
-N = 100
+N = 100   # this value can be changed (this is the number of towns)
 town_coordinates = town_init(N)
-# town_coordinates = [(94, 390), (348, 390), (179, 359), (263, 359),
-#     (10, 328), (137, 328), (390, 328), (263, 297),
-#     (52, 266), (221, 266), (348, 234), (94, 203),
-#     (179, 203), (348, 172), (10, 141), (179, 141),
-#     (390, 141), (10, 110), (94, 110), (306, 110)]
 random.shuffle(town_coordinates)  # ensures first iteration is randomly created
 print("Shortest distance: ", tabu_search_alg(town_coordinates, N))
 plot_graph()
