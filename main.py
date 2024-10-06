@@ -73,6 +73,7 @@ def fitness(path):
     total_distance += city_distance(path[n - 1], path[0])
     return total_distance
 
+# this function switches the order of towns in which they are visited, I use substring order inversion for this task
 def change_neighbours(arr):
     neighbour = arr.copy()
     n = len(neighbour)
@@ -81,6 +82,7 @@ def change_neighbours(arr):
     neighbour[i:j + 1] = reversed(neighbour[i:j + 1])
     return neighbour
 
+# this function calculates probability under which the algorithm chose worse solution for search in next iteration
 def probability(T, last_value, new_value):
     delta_E = new_value - last_value
     prob = math.exp(-delta_E / T)
@@ -93,11 +95,12 @@ def probability(T, last_value, new_value):
 def cool(T, cooling):
     return T * cooling
 
+# this is the main part of the algorithm
 def sim_annealing(init_path, n):
     i = 0
-    final_path = init_path.copy()  # this is the best overall path
-    best_candidate = init_path.copy()  # this is the best individual from generation
-    best_path = init_path.copy()  # this is the path that goes into other iteration
+    final_path = init_path.copy()  # the best overall path
+    best_candidate = init_path.copy()  # the best individual from generation
+    best_path = init_path.copy()  # the path that goes into other iteration
     T = 90.00  # initialization
     cooling = 0.997
     T_min = 10.00
@@ -121,22 +124,18 @@ def sim_annealing(init_path, n):
     show_best_path(final_path)
     return fitness(final_path)
 
+# this function just creates graph to better visualise the correct solution
 def plot_graph():
     plt.plot(graph_array)
-    plt.title('Total Distance over Iterations')
-    plt.xlabel('Iterations')
-    plt.ylabel('Total Distance')
+    plt.title("Total Distance over Iterations")
+    plt.xlabel("Iterations")
+    plt.ylabel("Total Distance")
     plt.grid(True)
     plt.show()
 
 
-N = 100
+N = 100  # this value can be changed (this is the number of towns)
 town_coordinates = town_init(N)
-# town_coordinates =[(60, 200), (180, 200), (100, 180), (140, 180),
-#     (20, 160), (80, 160), (200, 160), (140, 140),
-#     (40, 120), (120, 120), (180, 100), (60, 80),
-#     (100, 80), (180, 60), (20, 40), (100, 40),
-#     (200, 40), (20, 20), (60, 20), (160, 20)]
 random.shuffle(town_coordinates)  # ensures first iteration is randomly created
 print("Shortest distance: ", sim_annealing(town_coordinates, N))
 plot_graph()
