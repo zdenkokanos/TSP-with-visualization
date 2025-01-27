@@ -1,1 +1,1 @@
-# obchodny_cestujuci
+# School project - subject Artificial Inteligence - Traveling Salesman Problem with visualization
